@@ -29,11 +29,11 @@ function generate_fillet(A, B, C, r, n)
     BR_unit = BR/norm(BR)
 
     #https://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors
-    Θ = abs(-atan(det([BA'
-BC']), BA⋅BC))
+    Θ = -atan(det([BA'
+BC']), BA⋅BC)
 
     #https://www.cpp.edu/~hturner/ce220/circular_curves.pdf
-    Δ = π - Θ
+    Δ = π - abs(Θ)
 
     T = tan(Δ/2) * r
 
