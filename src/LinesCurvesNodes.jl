@@ -130,5 +130,37 @@ function find_nodes(nodes, xloc, yloc, zloc, atol_x, atol_y, atol_z)
 
 end
 
+
+#use for subdividing line elements
+function subdivide_line_segments(coords, num_sub_segments)
+
+    num_nodes = size(coords)[1]
+    num_segments = num_nodes - 1
+
+    sub_segments = Array{Vector{Vector{Float64}}}(undef, 0)
+
+    for i = 1:num_segments
+
+            A = coords[i]
+            B = coords[i+1]
+
+            AB = B-A
+
+            AB_unit = AB/norm(AB)
+
+            length_AB = norm(AB)
+
+            range_AB = range(0.0, length_AB, num_sub_segments+1)
+
+            sub_segments = [sub_segments; [A .+ AB_unit .* range_AB[j] for j in eachindex(range_AB)]] 
+
+    end
+
+    coords = unique(sub_segments)
+    
+    return coords
+
+end
+
 end # module
 
