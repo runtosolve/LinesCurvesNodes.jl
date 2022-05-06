@@ -154,9 +154,11 @@ function subdivide_line_segments(coords, num_sub_segments)
 
             sub_segments = [sub_segments; [A .+ AB_unit .* range_AB[j] for j in eachindex(range_AB)]] 
 
-    end
+            sub_segments = [round.(sub_segments[i], sigdigits=8) for i in eachindex(sub_segments)]  #round to help unique function work
 
-    coords = unique(sub_segments)
+    end 
+
+    coords = unique(sub_segments)  
     
     return coords
 
