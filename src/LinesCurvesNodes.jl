@@ -33,6 +33,7 @@ function generate_fillet(A, B, C, r, n)
 BC']), BA⋅BC)
 
     #https://www.cpp.edu/~hturner/ce220/circular_curves.pdf
+
     Δ = π - abs(Θ)
 
     T = tan(Δ/2) * r
@@ -45,7 +46,7 @@ BC']), BA⋅BC)
 
     Ra = a-R
 
-    dΔ = range(0.0, Δ, n+1)
+    dΔ = range(0.0, sign(Θ) * Δ, n+1)
 
     fillet = [Angle2d(dΔ[i]) * Ra + R for i in eachindex(dΔ)]  #Angle2d is 2D rotation matrix 
 

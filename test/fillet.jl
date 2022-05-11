@@ -24,3 +24,8 @@ B = [2.9146, 7.22]
 C = [5.4146, 7.22]
 
 fillet = LinesCurvesNodes.generate_fillet(A, B, C, r, n)
+
+answer = [ 2.9146   7.043
+2.93831  7.1315
+3.0031   7.19629
+3.0916   7.22]
