@@ -45,9 +45,9 @@ BC']), BA⋅BC)
 
     Ra = a-R
 
-    dΘ = range(0.0, Θ, n+1)
+    dΔ = range(0.0, Δ, n+1)
 
-    fillet = [Angle2d(dΘ[i]) * Ra + R for i in eachindex(dΘ)]  #Angle2d is 2D rotation matrix 
+    fillet = [Angle2d(dΔ[i]) * Ra + R for i in eachindex(dΔ)]  #Angle2d is 2D rotation matrix 
 
     fillet = permutedims(reshape(hcat(fillet...), (length(fillet[1]), length(fillet))))
 
