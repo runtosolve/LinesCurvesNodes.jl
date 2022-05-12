@@ -64,7 +64,7 @@ function discretize_vector(A, B, n)
     spacing = range(0.0, norm(AB), n+1)
     segments = [A .+ AB_unit .* spacing[i] for i in eachindex(spacing)] 
 
-    segments = permutedims(reshape(hcat(segments...), (length(segments[1]), length(segments))))
+    # segments = permutedims(reshape(hcat(segments...), (length(segments[1]), length(segments))))
 
     return segments
 
