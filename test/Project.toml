@@ -1,0 +1,3 @@
+[deps]
+LinesCurvesNodes = "74a74c3a-221d-4cd1-a4eb-c3c8149e7592"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
