@@ -1,6 +1,6 @@
 module LinesCurvesNodes
 
-using LinearAlgebra, Rotations, Unitful
+using LinearAlgebra, Rotations, Unitful, StaticArrays
 
 
 function transform_vector(L, start_node, Θ)
@@ -12,6 +12,9 @@ function transform_vector(L, start_node, Θ)
 
     #shift
     vector = vector + start_node
+
+    #convert mutable form of StaticArray
+    vector = MVector(vector)
 
     return vector
 
@@ -48,7 +51,7 @@ BC']), BA⋅BC)
 
     dΔ = range(0.0, sign(Θ) * Δ, n+1)
 
-    fillet = convert(Vector{Vector{Float64}}, [Angle2d(dΔ[i]) * Ra + R for i in eachindex(dΔ)])  #Angle2d is 2D rotation matrix 
+    fillet = convert(Vector{Vector{Any}}, [Angle2d(dΔ[i]) * Ra + R for i in eachindex(dΔ)])  #Angle2d is 2D rotation matrix 
 
     # fillet = permutedims(reshape(hcat(fillet...), (length(fillet[1]), length(fillet))))
 
