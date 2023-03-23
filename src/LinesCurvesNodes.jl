@@ -168,5 +168,71 @@ function subdivide_line_segments(coords, num_sub_segments)
 
 end
 
+#from InstantFrame
+function define_rotation_matrix(A, B, β)
+
+    AB = B - A
+
+    ΔX = AB[1]
+    ΔZ = AB[3]
+    ΔY = AB[2]
+
+    #Rotation global coordinate system about Y axis
+    ρ = atan(-ΔZ, ΔX)
+
+    #Rotation revised global coordinate system about Z axis
+    proj_AB_xz = sqrt(ΔX^2 + ΔZ^2)
+    χ = atan(ΔY, proj_AB_xz)
+
+    #Rotation revised global coordinate system about X axis
+    # current_local_y_axis = RotZ(-χ) * RotY(-ρ) * [0.0, 1.0, 0.0]  #where Y is pointing after Y and Z rotations 
+    # ω = acos(dot(current_local_y_axis, [0.0, 1.0, 0.0])/ norm(current_local_y_axis))
+
+    # # matrix of direction cosines
+    # γ = RotX(-(ω+β)) * RotZ(-χ) * RotY(-ρ) # add β here to rotate local y-axis to orient cross-section in global coordinate system 
+
+    ω = β
+
+    γ = RotYZX(ρ, χ, ω)' #transpose!
+
+    Γ = zeros(Float64, (12, 12))
+
+    Γ[1:3, 1:3] .= γ
+    Γ[4:6, 4:6] .= γ
+    Γ[7:9, 7:9] .= γ
+    Γ[10:12, 10:12] .= γ
+
+    angles = (Y=ρ, Z=χ, X=ω)
+
+    return Γ, angles 
+
+end
+
+#from InstantFrame 
+function beam_shape_function(q1, q2, q3, q4, L, x)
+    
+    a0 = q1
+    a1 = q2
+    a2 = 1/L^2*(-3*q1-2*q2*L+3*q3-q4*L)
+    a3 = 1/L^3*(2*q1+q2*L-2*q3+q4*L)
+    w = a0 + a1*x + a2*x^2 + a3*x^3
+
+    return w
+
+end
+
+#from InstantFrame
+function discretized_element_global_coords(node_i_coords, Γ, x)
+
+    local_element_discretized_coords = [zeros(Float64, 3) for i in eachindex(x)]
+
+    [local_element_discretized_coords[i][1] = x[i] for i in eachindex(x)]
+
+    global_element_discretized_coords = [Γ'[1:3, 1:3] * (local_element_discretized_coords[i]) .+  node_i_coords for i in eachindex(x)]
+
+    return global_element_discretized_coords
+
+end
+
 end # module
 
