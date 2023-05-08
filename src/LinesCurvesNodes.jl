@@ -168,43 +168,28 @@ function subdivide_line_segments(coords, num_sub_segments)
 
 end
 
-#from InstantFrame
-function define_rotation_matrix(A, B, β)
+
+function define_rotation_matrix(A, B)
+
 
     AB = B - A
 
     ΔX = AB[1]
-    ΔZ = AB[3]
     ΔY = AB[2]
 
-    #Rotation global coordinate system about Y axis
-    ρ = atan(-ΔZ, ΔX)
+    χ = atan(ΔY, ΔX)
 
-    #Rotation revised global coordinate system about Z axis
-    proj_AB_xz = sqrt(ΔX^2 + ΔZ^2)
-    χ = atan(ΔY, proj_AB_xz)
 
-    #Rotation revised global coordinate system about X axis
-    # current_local_y_axis = RotZ(-χ) * RotY(-ρ) * [0.0, 1.0, 0.0]  #where Y is pointing after Y and Z rotations 
-    # ω = acos(dot(current_local_y_axis, [0.0, 1.0, 0.0])/ norm(current_local_y_axis))
+    γ = [cos(χ) sin(χ) 0
+         -sin(χ) cos(χ) 0
+         0  0 1]
 
-    # # matrix of direction cosines
-    # γ = RotX(-(ω+β)) * RotZ(-χ) * RotY(-ρ) # add β here to rotate local y-axis to orient cross-section in global coordinate system 
-
-    ω = β
-
-    γ = RotYZX(ρ, χ, ω)' #transpose!
-
-    Γ = zeros(Float64, (12, 12))
+    Γ = zeros(Float64, (6, 6))
 
     Γ[1:3, 1:3] .= γ
     Γ[4:6, 4:6] .= γ
-    Γ[7:9, 7:9] .= γ
-    Γ[10:12, 10:12] .= γ
 
-    angles = (Y=ρ, Z=χ, X=ω)
-
-    return Γ, angles 
+    return Γ
 
 end
 
