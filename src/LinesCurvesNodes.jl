@@ -1,6 +1,24 @@
 module LinesCurvesNodes
 
-using LinearAlgebra, Rotations, Unitful, StaticArrays
+using LinearAlgebra, Rotations, Unitful, StaticArrays, Parameters
+
+
+@with_kw mutable struct Line
+
+    point_start::Vector{Float64}
+    point_end::Vector{Float64}
+    
+end
+
+@with_kw mutable struct Arc
+
+    center::Vector{Float64}
+    radius::Float64
+    angle_start::Float64
+    angle_end::Float64
+    
+end
+
 
 
 function transform_vector(L, start_node, Θ)
@@ -218,6 +236,222 @@ function discretized_element_global_coords(node_i_coords, Γ, x)
     return global_element_discretized_coords
 
 end
+
+function define_circular_segment(center, radius, θ_start, θ_end, n)
+
+    x(θ) = radius * cos(θ)
+    y(θ) = radius * sin(θ)
+
+    θc = range(θ_start, θ_end, length = n-1)
+ 
+
+    xc = center[1] .+ [x(θc[i]) for i in eachindex(θc)]
+    yc = center[2] .+ [y(θc[i]) for i in eachindex(θc)]
+
+    coords = [[xc[i], yc[i]] for i in eachindex(xc)]
+
+    return coords
+
+end
+
+
+
+function generate_xy_coordinates_from_dxf_JSON(data, n, n_r, reverse_arc_angles)
+
+    #read LINES and ARCS
+    cross_section = Vector{Union{Line, Arc}}(undef, size(data)[1])
+
+    for i in eachindex(data)
+
+        if data[i].type == "LINE"
+
+            cross_section[i] = Line([data[i].start.x, data[i].start.y], [data[i].end.x, data[i].end.y])
+
+        elseif data[i].type == "ARC"
+
+            cross_section[i] = Arc([data[i].center.x, data[i].center.y], data[i].radius, data[i].start_angle, data[i].end_angle)
+
+        end
+
+    end
+
+
+    #reverse start and end angles
+
+    # if reverse_arc_angles == true
+        # j = 1
+        # for i in eachindex(data)
+
+        #     if data[i].type == "ARC"
+
+        #         if reverse_arc_angles[j] == true
+
+        #                 cross_section[i].angle_start = data[i].end_angle 
+        #                 cross_section[i].angle_end = data[i].start_angle 
+
+        #         end
+            
+        #         j += 1
+                
+        #     end
+
+        # end
+
+        #     
+
+        # end
+
+    # end
+
+    # end
+
+    xy_all = Vector{Vector{Float64}}(undef, 0)
+
+    θ_start_all = Vector{Float64}(undef, 0)
+    θ_end_all = Vector{Float64}(undef, 0)
+
+    xy_segments = Vector{Vector{Vector{Float64}}}(undef, 0)
+
+    for i in eachindex(cross_section)
+
+        if typeof(cross_section[i]) == Line
+
+            if i == 1
+            
+                xy_segment = LinesCurvesNodes.subdivide_line_segments([cross_section[i].point_start, cross_section[i].point_end], n)
+
+            else
+
+                xy_segment = LinesCurvesNodes.subdivide_line_segments([cross_section[i].point_start, cross_section[i].point_end], n)[2:end]
+
+            end
+
+
+            xy_all = vcat(xy_all, xy_segment)
+
+            xy_segments = [xy_segments; [xy_segment]]
+
+        elseif typeof(cross_section[i]) == Arc
+
+            center = cross_section[i].center
+            radius = cross_section[i].radius
+
+            θ_start = deg2rad(cross_section[i].angle_start) 
+
+            θ_end = deg2rad(cross_section[i].angle_end) 
+
+            # if θ_start >= 3π/2
+
+            #     if (θ_end > 0) & (θ_end < π/2)
+
+            #         θ_end =  θ_end + 2π
+
+            #     elseif isapprox(θ_start, 2π) 
+
+            #         θ_start =  0.0
+
+            #     end
+
+            # end
+
+            if θ_end < θ_start
+
+                if θ_end >= 0.0
+
+                    θ_end = θ_end + 2π
+
+                end
+
+            end
+
+            push!(θ_start_all, θ_start)
+            push!(θ_end_all, θ_end)
+
+            xy_arc = LinesCurvesNodes.define_circular_segment(center, radius, θ_start, θ_end, n_r)
+
+            if reverse_arc_angles[i] == true
+
+                xy_arc = reverse(xy_arc)[2:end]
+
+            else
+
+                xy_arc = xy_arc[2:end]
+
+            end
+
+            xy_all = vcat(xy_all, xy_arc)
+
+            xy_segments = [xy_segments; [xy_arc]]
+
+        end
+
+    end
+
+    return xy_all, xy_segments,  θ_start_all,  θ_end_all 
+
+end
+
+
+
+function extrude_open_cross_section_with_shell_elements(X, Y, Z)
+
+
+    num_cross_sections = length(Z)
+    num_nodes_cross_section  = length(X)
+    cross_section_nodes = [X Y]
+     
+    nodes = Array{Float64}(undef, 0, 3)
+    for i = 1:num_cross_sections
+
+        cross_section_nodes_xyz = [cross_section_nodes ones(Float64, num_nodes_cross_section) * Z[i]]
+        nodes = vcat(nodes, cross_section_nodes_xyz)
+
+    end
+
+    #Calculate the number of elements in the cross-section.
+    num_elements_cross_section = num_nodes_cross_section - 1
+
+    #Define the number of model segments along the length.
+    num_model_segments = num_cross_sections - 1
+
+    #Calculate total number of elements in the model.
+    num_elements = num_elements_cross_section * num_model_segments
+
+    #Initialize the solid element definition array.
+
+    shell_elements = zeros(Int64, (num_elements, 9))
+
+    element_number = 0
+
+    for j = 1:num_model_segments
+        
+        for i = 1:num_elements_cross_section
+
+            n_1 = i + (j - 1) * num_nodes_cross_section
+            n_2 = i + j * num_nodes_cross_section
+            n_3 = n_2 + 1
+            n_4 = n_1 + 1
+            n_5 = 0
+            n_6 = 0
+            n_7 = 0
+            n_8 = 0
+
+            element_number = element_number + 1
+
+            shell_element_cell = [element_number n_1 n_2 n_3 n_4 n_5 n_6 n_7 n_8]
+
+            shell_elements[element_number, :] = shell_element_cell
+
+        end
+
+    end
+
+    nodes = Union{Float64, Int64}[1:size(nodes)[1] nodes]
+
+    return nodes, shell_elements
+
+end
+
 
 end # module
 
