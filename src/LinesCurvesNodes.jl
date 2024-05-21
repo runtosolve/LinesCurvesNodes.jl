@@ -453,5 +453,58 @@ function extrude_open_cross_section_with_shell_elements(X, Y, Z)
 end
 
 
+#for cross-sections with varying thickness, find the array range for each line segment that has the same thickness, used in CUFSM.Show
+function find_linesegments(linewidths)
+
+    index_start = 1
+
+    linesegment_ranges = Vector{Vector{Int}}(undef, 0)
+    linewidth_segments = Vector{Float64}(undef, 0)
+    for i in eachindex(linewidths[1:end-1])
+
+        if linewidths[i] != linewidths[i+1]
+
+            index_end = i
+            push!(linesegment_ranges, [index_start, index_end])
+            push!(linewidth_segments, linewidths[i])
+            index_start = i+1
+
+        end
+
+        if i == (length(linewidths) - 1)
+            index_end = i + 1
+            push!(linesegment_ranges, [index_start, index_end])
+            push!(linewidth_segments, linewidths[i])
+        end
+
+    end
+
+    return linesegment_ranges, linewidth_segments
+
+end
+
+#for cross-sections with varying thickness, used in CUFSM.Show
+function combine_points_into_linesegments(linesegment_ranges, cross_section_coords)
+
+    linesegments = Vector{Vector{Vector{Float64}}}(undef, size(linesegment_ranges)[1])
+
+    for i in eachindex(linesegment_ranges)
+        for j = linesegment_ranges[i][1]:linesegment_ranges[i][2]
+
+            if j == linesegment_ranges[i][1]
+                linesegments[i] = cross_section_coords[j]
+            else
+                linesegments[i] = [linesegments[i]; cross_section_coords[j]]
+            end
+            
+
+        end
+    end
+
+    return linesegments
+
+end
+
+
 end # module
 
