@@ -487,18 +487,11 @@ end
 function combine_points_into_linesegments(linesegment_ranges, cross_section_coords)
 
     linesegments = Vector{Vector{Vector{Float64}}}(undef, size(linesegment_ranges)[1])
-
+ 
     for i in eachindex(linesegment_ranges)
-        for j = linesegment_ranges[i][1]:linesegment_ranges[i][2]
 
-            if j == linesegment_ranges[i][1]
-                linesegments[i] = cross_section_coords[j]
-            else
-                linesegments[i] = [linesegments[i]; cross_section_coords[j]]
-            end
-            
-
-        end
+        linesegments[i] = cross_section_coords[linesegment_ranges[i][1]:linesegment_ranges[i][2]]
+      
     end
 
     return linesegments
