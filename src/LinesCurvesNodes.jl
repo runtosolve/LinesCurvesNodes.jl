@@ -484,14 +484,31 @@ function find_linesegments(linewidths)
 end
 
 #for cross-sections with varying thickness, used in CUFSM.Show
-function combine_points_into_linesegments(linesegment_ranges, cross_section_coords)
+function combine_points_into_linesegments(linesegment_ranges, x, y)
 
     linesegments = Vector{Vector{Vector{Float64}}}(undef, size(linesegment_ranges)[1])
- 
+    # linesegments = Vector{Vector{Vector{Float64}}}(undef, size(linesegment_ranges)[1])
+
     for i in eachindex(linesegment_ranges)
 
-        linesegments[i] = cross_section_coords[linesegment_ranges[i][1]:linesegment_ranges[i][2]]
+        # linesegments[i] = cross_section_coords[linesegment_ranges[i][1]:linesegment_ranges[i][2]]
       
+        nodes = Vector{Float64}[]
+        for j = linesegment_ranges[i][1]:linesegment_ranges[i][2]
+
+            push!(nodes, [x[j], y[j]])
+
+            if (j+1) < length(x)  #stops 1 element short for a closed section, taken care of in Show.section to plot last closed section element
+                push!(nodes, [x[j+1], y[j+1]])
+            end
+
+        end
+
+        nodes = unique(nodes)
+
+        linesegments[i] = nodes
+
+
     end
 
     return linesegments
