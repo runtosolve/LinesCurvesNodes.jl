@@ -474,7 +474,7 @@ function find_linesegments(linewidths)
         if i == (length(linewidths) - 1)
             index_end = i + 1
             push!(linesegment_ranges, [index_start, index_end])
-            push!(linewidth_segments, linewidths[i])
+            push!(linewidth_segments, linewidths[i+1])
         end
 
     end
@@ -502,7 +502,17 @@ function combine_points_into_linesegments(linesegment_ranges, x, y)
                 push!(nodes, [x[j+1], y[j+1]])
             end
 
+            # if (j+1) < length(x)  #stops 1 element short for a closed section, taken care of in Show.section to plot last closed section element
+            # push!(nodes, [x[j+1], y[j+1]])
+            # end
+
         end
+
+   
+        if (i == size(linesegment_ranges)[1]) & (length(x) > size(linesegment_ranges)[1])   #get last node in an open cross-section, for section plots
+            push!(nodes, [x[end], y[end]])
+        end
+        
 
         nodes = unique(nodes)
 
