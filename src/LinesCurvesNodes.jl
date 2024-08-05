@@ -391,6 +391,77 @@ function generate_xy_coordinates_from_dxf_JSON(data, n, n_r, reverse_arc_angles)
 
 end
 
+#for cross-sections with varying thickness, find the array range for each line segment that has the same thickness, used in CUFSM.Show
+function find_linesegments(linewidths)
+
+    index_start = 1
+
+    linesegment_ranges = Vector{Vector{Int}}(undef, 0)
+    linewidth_segments = Vector{Float64}(undef, 0)
+    for i in eachindex(linewidths[1:end-1])
+
+        if linewidths[i] != linewidths[i+1]
+
+            index_end = i
+            push!(linesegment_ranges, [index_start, index_end])
+            push!(linewidth_segments, linewidths[i])
+            index_start = i+1
+
+        end
+
+        if i == (length(linewidths) - 1)
+            index_end = i + 1
+            push!(linesegment_ranges, [index_start, index_end])
+            push!(linewidth_segments, linewidths[i+1])
+        end
+
+    end
+
+    return linesegment_ranges, linewidth_segments
+
+end
+
+#for cross-sections with varying thickness, used in CUFSM.Show
+function combine_points_into_linesegments(linesegment_ranges, x, y)
+
+    linesegments = Vector{Vector{Vector{Float64}}}(undef, size(linesegment_ranges)[1])
+    # linesegments = Vector{Vector{Vector{Float64}}}(undef, size(linesegment_ranges)[1])
+
+    for i in eachindex(linesegment_ranges)
+
+        # linesegments[i] = cross_section_coords[linesegment_ranges[i][1]:linesegment_ranges[i][2]]
+      
+        nodes = Vector{Float64}[]
+        for j = linesegment_ranges[i][1]:linesegment_ranges[i][2]
+
+            push!(nodes, [x[j], y[j]])
+
+            if (j+1) < length(x)  #stops 1 element short for a closed section, taken care of in Show.section to plot last closed section element
+                push!(nodes, [x[j+1], y[j+1]])
+            end
+
+            # if (j+1) < length(x)  #stops 1 element short for a closed section, taken care of in Show.section to plot last closed section element
+            # push!(nodes, [x[j+1], y[j+1]])
+            # end
+
+        end
+
+   
+        if (i == size(linesegment_ranges)[1]) & (length(x) > size(linesegment_ranges)[1])   #get last node in an open cross-section, for section plots
+            push!(nodes, [x[end], y[end]])
+        end
+        
+
+        nodes = unique(nodes)
+
+        linesegments[i] = nodes
+
+
+    end
+
+    return linesegments
+
+end
 
 
 end # module
