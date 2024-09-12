@@ -153,6 +153,20 @@ function find_nodes(nodes, xloc, yloc, zloc, atol_x, atol_y, atol_z)
 end
 
 
+function find_nodes(nodes, xloc, yloc, zloc)
+
+   
+    x_index = findall(x-> (x >= xloc[1]) & (x <= xloc[2]), nodes[:,1])
+    y_index = findall(y-> (y >= yloc[1]) & (y <= yloc[2]), nodes[:,2])
+    z_index = findall(z-> (z >= zloc[1]) & (z <= zloc[2]), nodes[:,3])
+
+    index = intersect(intersect(x_index, y_index), z_index)
+
+    return index
+
+end
+
+
 #use for subdividing line elements
 function subdivide_line_segments(coords, num_sub_segments)
 
@@ -462,6 +476,24 @@ function combine_points_into_linesegments(linesegment_ranges, x, y)
     return linesegments
 
 end
+
+
+function find_elements_containing_nodes(node_set, elements)
+
+    element_set = Int[]
+    for i in eachindex(node_set)
+
+        element_index = findfirst(node_number -> node_number==node_set[i], elements[:, 2:end])
+        if !isnothing(element_index)
+            push!(element_set, elements[element_index[1], 1])
+        end
+
+    end
+
+    return unique(element_set)
+
+end
+
 
 
 end # module
