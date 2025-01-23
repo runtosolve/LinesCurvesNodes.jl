@@ -23,7 +23,7 @@ end
 
 function transform_vector(L, start_node, Θ)
 
-    vector = [L; 0.0*unit(L[1])] 
+    vector = [L; 0.0] 
 
     #rotate
     vector = Angle2d(Θ) * vector
