@@ -82,7 +82,7 @@ function discretize_vector(A, B, n)
 
     AB = B - A
     AB_unit = AB / norm(AB)
-    spacing = range(0.0 * unit(A[1]), norm(AB), n+1)
+    spacing = range(0.0, norm(AB), n+1)
     segments = [A .+ AB_unit .* spacing[i] for i in eachindex(spacing)] 
 
     # segments = permutedims(reshape(hcat(segments...), (length(segments[1]), length(segments))))
@@ -186,7 +186,7 @@ function subdivide_line_segments(coords, num_sub_segments)
 
             length_AB = norm(AB)
 
-            range_AB = range(0.0 * unit(A[1]), length_AB, num_sub_segments+1)
+            range_AB = range(0.0, length_AB, num_sub_segments+1)
 
             sub_segments = [sub_segments; [A .+ AB_unit .* range_AB[j] for j in eachindex(range_AB)]] 
 
