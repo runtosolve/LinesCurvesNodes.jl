@@ -1,16 +1,16 @@
 module LinesCurvesNodes
 
-using LinearAlgebra, Rotations, Unitful, StaticArrays, Parameters
+using LinearAlgebra, Rotations, StaticArrays
 
 
-@with_kw mutable struct Line
+mutable struct Line
 
     point_start::Vector{Float64}
     point_end::Vector{Float64}
     
 end
 
-@with_kw mutable struct Arc
+mutable struct Arc
 
     center::Vector{Float64}
     radius::Float64
