@@ -496,5 +496,46 @@ end
 
 
 
+function order_nodes_along_a_curved_line(X, Y)
+
+    anchor_index = 1
+
+    X_group = X 
+    Y_group = Y
+
+    X_anchor = X_group[anchor_index]
+    Y_anchor = Y_group[anchor_index]
+
+    X_ordered = [X_anchor]
+    Y_ordered = [Y_anchor]
+
+
+    while length(X_group) > 1
+
+        index = 1:length(X_group)
+        group_index = setdiff(index, anchor_index)
+
+        X_group = X_group[group_index]
+        Y_group = Y_group[group_index]
+
+        distance = [norm([X_group[i], Y_group[i]] - [X_anchor, Y_anchor]) for i in eachindex(X_group)]
+
+        closest_index = argmin(distance)
+
+        push!(X_ordered, X_group[closest_index])
+        push!(Y_ordered, Y_group[closest_index])
+
+        anchor_index = closest_index
+        X_anchor = X_group[anchor_index]
+        Y_anchor = Y_group[anchor_index]
+
+    end
+
+    return X_ordered, Y_ordered 
+
+end
+
+
+
 end # module
 
