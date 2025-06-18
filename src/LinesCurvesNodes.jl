@@ -536,6 +536,23 @@ function order_nodes_along_a_curved_line(X, Y)
 end
 
 
+function delete_elements(element_numbers_to_delete, elements)
+
+    element_numbers = elements[:, 1]
+
+    # https://discourse.julialang.org/t/finding-indices-using-setdiff/26930
+    A = element_numbers_to_delete 
+    B = element_numbers
+
+    index = [findfirst(isequal(x), B) for x in setdiff(B,A)]
+
+    elements = elements[index, :]
+
+    return elements 
+
+end
+
+
 
 end # module
 
