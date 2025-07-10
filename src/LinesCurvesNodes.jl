@@ -481,11 +481,15 @@ end
 function find_elements_containing_nodes(node_set, elements)
 
     element_set = Int[]
+    
     for i in eachindex(node_set)
-
-        element_index = findfirst(node_number -> node_number==node_set[i], elements[:, 2:end])
+        element_index = findall(node_number -> node_number==node_set[i], elements[:, 2:end])
         if !isnothing(element_index)
-            push!(element_set, elements[element_index[1], 1])
+
+            for j=1:size(element_index)[1]
+                push!(element_set, elements[element_index[j][1], 1])
+            end
+
         end
 
     end
