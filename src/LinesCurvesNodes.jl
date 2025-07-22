@@ -557,6 +557,22 @@ function delete_elements(element_numbers_to_delete, elements)
 end
 
 
+function delete_nodes(node_numbers_to_delete, nodes)
+
+    node_numbers = nodes[:, 1]
+
+    # https://discourse.julialang.org/t/finding-indices-using-setdiff/26930
+    A = node_numbers_to_delete 
+    B = node_numbers
+
+    index = [findfirst(isequal(x), B) for x in setdiff(B,A)]
+
+    nodes = nodes[index, :]
+
+    return nodes 
+
+end
+
 
 end # module
 
