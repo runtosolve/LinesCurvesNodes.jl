@@ -494,6 +494,16 @@ function find_elements_containing_nodes(node_set, elements)
 
     end
 
+    # element_index = [findall(elements[:,2:5].==node_set[i]) for i in eachindex(node_set)] 
+
+    # element_set = Int[]
+
+    # for i in eachindex(element_index)
+    #     rows = [idx[1] for idx in element_index[i]]
+    #     element_set = [element_set; rows]
+    # end
+
+
     return unique(element_set)
 
 end
