@@ -166,6 +166,31 @@ function find_nodes(nodes, xloc, yloc, zloc)
 
 end
 
+function find_nodes_circle(nodes, xcenter, ycenter, zcenter, diameter, axis::Symbol)
+
+    radius = diameter / 2
+
+    if axis == :z
+        dist = sqrt.((nodes[:,1] .- xcenter).^2 .+ (nodes[:,2] .- ycenter).^2)
+        in_circle = findall(d -> d <= radius, dist)
+        on_plane  = findall(z -> isapprox(z, zcenter), nodes[:,3])
+        return intersect(in_circle, on_plane)
+
+    elseif axis == :y
+        dist = sqrt.((nodes[:,1] .- xcenter).^2 .+ (nodes[:,3] .- zcenter).^2)
+        in_circle = findall(d -> d <= radius, dist)
+        on_plane  = findall(y -> isapprox(y, ycenter), nodes[:,2])
+        return intersect(in_circle, on_plane)
+
+    elseif axis == :x
+        dist = sqrt.((nodes[:,2] .- ycenter).^2 .+ (nodes[:,3] .- zcenter).^2)
+        in_circle = findall(d -> d <= radius, dist)
+        on_plane  = findall(x -> isapprox(x, xcenter), nodes[:,1])
+        return intersect(in_circle, on_plane)
+
+    end
+
+end
 
 #use for subdividing line elements
 function subdivide_line_segments(coords, num_sub_segments)
