@@ -1,7 +1,7 @@
 name = "LinesCurvesNodes"
 uuid = "74a74c3a-221d-4cd1-a4eb-c3c8149e7592"
 authors = ["Cris Moen <cris.moen@runtosolve.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
